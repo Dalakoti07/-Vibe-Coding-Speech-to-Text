@@ -236,10 +236,10 @@ every clean install begins in.
 
 | | Status |
 |---|---|
-| **Recipe collision with streaming models** | A streaming parakeet export has the *same four filenames* as the non-streaming one, so the scanner would claim it as offline and hand streaming weights to `OfflineRecognizer`. Fix is one line — read the decoder's `streaming_model_type` ONNX metadata during detection, as sherpa itself does |
+| **Recipe collision with streaming models** | A streaming parakeet export has the *same four filenames* as the non-streaming one, so the scanner would claim it as offline. Fix is a 4 KB tail read of `decoder.int8.onnx` — the `nemo_parakeet_unified_streaming` marker sits in its last 53 bytes. Scheduled as v2.0.0 Phase 10 |
 | **No foreground service** | Recording is foreground-only. ColorOS's freezer will cut it off if the screen sleeps mid-sentence |
 | **No idle unload** | Measured memory made it unnecessary; revisit if a larger model lands |
-| **Streaming recognition** | Researched, not built. It is a second engine (`OnlineRecognizer`, chunked feeding, endpointing), not a config branch — and endpointing reintroduces the bullet problem |
+| **Streaming recognition** | **Planned as v2.0.0.** Measured one-shot decode is over 4 s, which is what makes it worth a second engine. Phases 10–14 in [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md#v200--streaming-recognition) |
 | **IME / keyboard** | Out of scope. Every dictation therefore ends in a manual copy-paste |
 
 ---

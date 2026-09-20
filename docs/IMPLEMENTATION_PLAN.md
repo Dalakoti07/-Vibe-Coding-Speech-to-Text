@@ -2,7 +2,13 @@
 
 **Repo:** `SpeechToText2` · `com.dalakoti.apps.speechtotext`
 **Device:** OnePlus 9R (SD870, Android 14, ColorOS)
-**Status:** plan only — no implementation yet
+
+| Version | Scope | Status |
+|---|---|---|
+| **v1.0.0** | One-shot dictation, weights from shared storage | **Shipped** — phases 0–4, cold load 2,598–3,028 ms, peak 830–838 MB |
+| **v2.0.0** | Streaming recognition | **Planned** — phases 10–14, ~3 days |
+
+Phases 0–4 below describe v1.0.0 as built. [v2.0.0 starts here](#v200--streaming-recognition).
 
 ---
 
@@ -877,3 +883,261 @@ capture source, exposed in Settings:
 
 The recorder also refuses to start if `AudioRecord` hands back a rate other than 16 kHz,
 rather than quietly resampling.
+
+---
+
+# v2.0.0 — Streaming recognition
+
+**Trigger:** one-shot decode measured at **over 4 seconds** on a normal utterance. That is
+long enough that the wait is the product's worst moment, and long enough to pay for a
+second engine.
+
+**Effort:** ~3 days across phases 10–14. Additive — the v1.0.0 offline path keeps working,
+and both engines sit behind `AsrEngine`.
+
+## What comes free
+
+The streaming archives are the same family, re-exported:
+
+| File | non-streaming | streaming-560ms |
+|---|---|---|
+| `tokens.txt` | 8,952 B | 8,952 B — identical |
+| `joiner.int8.onnx` | 1,735,860 B | 1,735,860 B — identical |
+| `decoder.int8.onnx` | 7,257,753 B | 7,257,777 B — 24 B apart |
+
+Same ~500 MB archive, so the 830 MB memory figure should not move. Four chunk latencies
+exist: `240ms`, `560ms`, `1120ms`, and the non-streaming build already in use.
+
+## Verified before planning
+
+| Question | Answer | Evidence |
+|---|---|---|
+| Does the vendored v1.13.8 support streaming parakeet? | **Yes** — no runtime bump needed | `v1.13.8/.../online-recognizer-impl.cc:53,118`; the impl header ships |
+| How is the implementation selected? | **Automatically** — sherpa reads the decoder's ONNX metadata. You set no model-type string | `IsNeMoParakeetUnifiedStreaming()` |
+| Can Kotlin tell the exports apart? | **Yes, with a 4 KB tail read** | marker at byte 7,257,724 of 7,257,777 — the last 53 bytes |
+| Does the non-streaming export carry the marker? | **No** — absence is a reliable negative | byte search over the complete file |
+
+> **Correction worth recording.** The first check of this said the marker was absent. It
+> was not — the decoder had come from a partial download and its trailer was cut off.
+> Re-fetched 30 MB of the archive and the marker is there. The Phase 10 detection strategy
+> rests on this, and reading a file's tail is only meaningful once you know the file is
+> complete.
+
+## What is not free
+
+`OfflineRecognizer` and `OnlineRecognizer` are unrelated classes sharing no interface:
+
+```
+offline    acceptWaveform(everything) → decode() → getResult()          // once
+streaming  acceptWaveform(chunk) → while (isReady) decode()
+           → getResult() → isEndpoint()? → reset()                      // continuously
+```
+
+That `reset()` is endpoint detection, which *is* per-segment splitting — the exact
+mechanism that made the sherpa demo emit a bullet per pause.
+
+---
+
+## Phase 10 — Tell the two exports apart
+
+`~½ day` · prerequisite · fixes a bug that already exists
+
+A streaming export has the same four filenames as a non-streaming one, so today's
+`NemoOfflineTransducerRecipe` claims it and hands streaming weights to
+`OfflineRecognizer`. Fix this first or every later test fails confusingly.
+
+```kotlin
+private const val STREAMING_MARKER = "nemo_parakeet_unified_streaming"
+
+/** The marker lives in the decoder's ONNX metadata, in the last ~50 bytes. */
+fun isStreamingExport(decoder: File): Boolean {
+    val len = decoder.length()
+    if (len < 1024) return false          // truncated copy — caller rejects it anyway
+    val n = minOf(len, 8192L).toInt()
+    RandomAccessFile(decoder, "r").use { f ->
+        f.seek(len - n)
+        val buf = ByteArray(n)
+        f.readFully(buf)
+        return String(buf, Charsets.ISO_8859_1).contains(STREAMING_MARKER)
+    }
+}
+```
+
+- **No ONNX Runtime Java dependency.** Adding `onnxruntime-android` purely to read one
+  metadata key would ship a second copy of a 22 MB native library.
+- **Order matters.** Run the existing encoder size floor *before* this — reading the tail
+  of a half-copied file is meaningless.
+- **`model.json` still wins.** Detection is the fallback; an explicit `"recipe"` field
+  remains the deterministic override.
+
+> **Done test.** Both a streaming and a non-streaming directory in `/sdcard/Models`.
+> Settings lists each under the right recipe; selecting either loads the matching engine
+> class. Renaming a directory changes nothing — detection reads the file, not the name.
+
+---
+
+## Phase 11 — Online spike
+
+`~½ day` · throwaway · the phase that can still kill v2.0.0
+
+Vendor `OnlineRecognizer.kt` and `OnlineStream.kt` at the same pinned tag.
+
+```kotlin
+val config = OnlineRecognizerConfig(
+    featConfig = FeatureConfig(sampleRate = 16000, featureDim = 80),
+    modelConfig = OnlineModelConfig(
+        transducer = OnlineTransducerModelConfig(
+            encoder = File(dir, "encoder.int8.onnx").absolutePath,
+            decoder = File(dir, "decoder.int8.onnx").absolutePath,
+            joiner  = File(dir, "joiner.int8.onnx").absolutePath,
+        ),
+        tokens     = File(dir, "tokens.txt").absolutePath,
+        numThreads = 4,
+        provider   = "cpu",
+    ),
+    // no modelType string — sherpa reads it from the decoder's metadata
+    enableEndpoint = true,
+)
+
+val r = OnlineRecognizer(assetManager = null, config = config)
+val stream = r.createStream()
+
+var settled = ""
+chunksOf100ms.forEach { chunk ->
+    stream.acceptWaveform(chunk, 16000)
+    while (r.isReady(stream)) r.decode(stream)
+    val partial = r.getResult(stream).text
+    if (r.isEndpoint(stream)) { settled = (settled + " " + partial).trim(); r.reset(stream) }
+}
+stream.inputFinished()
+```
+
+**Measure four numbers:** cold load, peak PSS, time to first partial, mean decode per chunk.
+
+> **Stop conditions — reassess before Phase 12**
+> - **Mean decode per chunk > the chunk's own duration.** This is the one that sinks
+>   streaming: if a 560 ms chunk takes 700 ms, the app falls further behind the longer you
+>   speak. Try `1120ms`, then a smaller model. Do not proceed hoping it will be fine.
+> - `newFromFile` returns `0L` → confirm the marker is really in the decoder before
+>   blaming the config; a truncated push produces exactly this.
+> - Peak RSS above ~1.8 GB → rethink the two-engine story in Phase 13 first.
+
+---
+
+## Phase 12 — Chunked capture
+
+`~½ day` · additive · the v1.0.0 path is untouched
+
+```kotlin
+// added beside record(), not replacing it
+fun recordStreaming(
+    source: CaptureSource,
+    maxMillis: Long,
+    chunkMillis: Int = 100,
+): Flow<FloatArray>
+```
+
+- **Keep the stop flag.** The lesson applies harder here: cancelling mid-utterance discards
+  audio the recogniser has not seen yet.
+- **Chunk size is capture-side, not model-side.** Feeding 100 ms chunks to a 560 ms model is
+  fine — sherpa buffers internally until `isReady`.
+
+> **Done test.** A 30-second recording emits ~300 chunks whose lengths sum to what
+> `record()` would have returned for the same input, and releasing ends capture within one
+> chunk.
+
+---
+
+## Phase 13 — The streaming engine
+
+`~1 day` · the real refactor
+
+### ModelRecipe has to stop returning one type
+
+`buildConfig` returning `OfflineRecognizerConfig` is the thing blocking streaming, and the
+only breaking change in v2.0.0.
+
+```kotlin
+sealed interface ModelRecipe {
+    val id: String
+    val displayName: String
+    val requiredFiles: List<String>
+    fun matches(dir: File): Boolean
+}
+
+interface OfflineModelRecipe : ModelRecipe {
+    fun buildConfig(dir: File, tuning: Tuning): OfflineRecognizerConfig
+}
+
+interface OnlineModelRecipe : ModelRecipe {
+    fun buildConfig(dir: File, tuning: Tuning): OnlineRecognizerConfig
+}
+```
+
+### AsrEngine gains a streaming contract
+
+```kotlin
+interface StreamingAsrEngine : AsrEngine {
+    fun transcribe(audio: Flow<FloatArray>, sampleRate: Int): Flow<Dictation>
+}
+
+data class Dictation(
+    val settled: String = "",   // endpointed segments, already joined
+    val partial: String = "",   // in-flight guess, replaced every tick
+) {
+    val display: String get() = (settled + " " + partial).trim()
+}
+```
+
+On `isEndpoint()`: append the partial to `settled`, clear the partial, `reset(stream)`.
+Render `display` in **one** `Text`. The moment a list of segments appears anywhere in this
+path, v1.0.0's defining fix is undone.
+
+### Two engines, one at a time
+
+The singleton rule gets stricter, not looser: **unload before load** across an
+offline→streaming switch, or you hold ~1 GB of weights. The existing mutex already
+serialises it.
+
+> **Done test.** Switching between streaming and non-streaming models works both ways,
+> `dumpsys meminfo` never shows both resident, and a 30-second dictation produces one
+> paragraph with no duplicated words at the segment joins.
+
+---
+
+## Phase 14 — Partials on screen, and picking a chunk size
+
+`~½ day`
+
+- **Render `display` in the existing single `Text`.** No second component, no animation on
+  the partial — text that reflows while you read it is worse than text that appears.
+- **Settle on release.** `inputFinished()`, drain the remaining `isReady` loop, persist
+  once. Partials never reach DataStore.
+- **Copy stays explicit.** Streaming changes nothing about the clipboard rule.
+
+### The A/B that picks the default
+
+Record one 30-second WAV, push it, decode with all three exports. Comparing across separate
+live recordings measures your diction, not the model.
+
+| Export | Expect | Watch for |
+|---|---|---|
+| `240ms` | Snappiest partials | Falling behind real time; word churn |
+| `560ms` | The likely default | — |
+| `1120ms` | Closest to non-streaming accuracy | Lag long enough to feel like v1 again |
+
+> **Done test.** Text appears while you speak; the paragraph on release matches the
+> non-streaming output for the same audio to within a word or two; the chosen chunk size is
+> recorded in the README with the numbers that chose it.
+
+---
+
+## v2.0.0 risk ledger
+
+| Sev | Risk | Mitigation | Phase |
+|---|---|---|---|
+| **HIGH** | Decode per chunk exceeds the chunk's duration, so the transcript falls further behind the longer you speak | Phase 11 measures it before anything is built on it; fall back to a longer chunk, then a smaller model | 11 |
+| **HIGH** | Endpointing reintroduces the bullet list — it is the same per-segment split | `settled` + `partial` accumulator, one `Text`, never a list | 13 |
+| **HIGH** | Both engines resident across a switch — ~1 GB of weights | Unload-before-load; done test checks `dumpsys` directly | 13 |
+| **MED** | Streaming accuracy worse than one-shot — the encoder sees limited right context | A/B all three chunk sizes on one recorded WAV | 14 |
+| **MED** | A streaming export claimed by the offline recipe — identical filenames | Tail-read the decoder's ONNX marker; Phase 10 exists only for this | 10 |
