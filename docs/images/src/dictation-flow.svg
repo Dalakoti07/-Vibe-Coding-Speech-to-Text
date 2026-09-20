@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="560" viewBox="0 0 1000 560" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+<title>Dictation flow</title>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5A6B78"/></marker>
+  <marker id="arrowblue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0D5B87"/></marker>
+  <marker id="arrowamber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#A6521C"/></marker>
+</defs>
+<rect width="1000" height="560" fill="#F3F6F8"/>
+<text x="40" y="44" font-size="22" fill="#0F171E" font-weight="bold" text-anchor="start">One dictation, end to end</text>
+<text x="40" y="66" font-size="13" fill="#5A6B78" font-weight="normal" text-anchor="start">One-shot, not streaming: the whole utterance is buffered, then decoded once.</text>
+<rect x="40" y="110" width="210" height="96" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<rect x="40" y="110" width="4" height="96" rx="2" fill="#A6521C"/>
+<text x="58" y="138" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start">1 · Press or hold</text>
+<text x="58" y="160" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">MicButton</text>
+<text x="58" y="178" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">gesture → startRecording()</text>
+<rect x="290" y="110" width="210" height="96" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<rect x="290" y="110" width="4" height="96" rx="2" fill="#A6521C"/>
+<text x="308" y="138" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start">2 · Capture</text>
+<text x="308" y="160" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">AudioRecord @ 16 kHz mono</text>
+<text x="308" y="178" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">PCM16 → FloatArray</text>
+<rect x="540" y="110" width="210" height="96" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<rect x="540" y="110" width="4" height="96" rx="2" fill="#A6521C"/>
+<text x="558" y="138" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start">3 · Release</text>
+<text x="558" y="160" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">stop flag, not cancel</text>
+<text x="558" y="178" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">loop returns its buffer</text>
+<rect x="40" y="266" width="210" height="96" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<rect x="40" y="266" width="4" height="96" rx="2" fill="#0D5B87"/>
+<text x="58" y="294" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start">4 · Decode</text>
+<text x="58" y="316" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">AsrEngine.transcribe()</text>
+<text x="58" y="334" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">mutex-guarded, once</text>
+<rect x="290" y="266" width="210" height="96" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<rect x="290" y="266" width="4" height="96" rx="2" fill="#1A6A4C"/>
+<text x="308" y="294" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start">5 · Persist</text>
+<text x="308" y="316" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">HistoryStore.add()</text>
+<text x="308" y="334" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">before rendering</text>
+<rect x="540" y="266" width="210" height="96" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<rect x="540" y="266" width="4" height="96" rx="2" fill="#1A6A4C"/>
+<text x="558" y="294" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start">6 · Render</text>
+<text x="558" y="316" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">a single Text</text>
+<text x="558" y="334" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">never a LazyColumn</text>
+<rect x="790" y="266" width="170" height="96" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<rect x="790" y="266" width="4" height="96" rx="2" fill="#B23520"/>
+<text x="808" y="294" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start">7 · Copy</text>
+<text x="808" y="316" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">only when pressed</text>
+<text x="808" y="334" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">ClipboardWriter</text>
+<path d="M250,158 L290,158" stroke="#A6521C" stroke-width="1.6" fill="none" marker-end="url(#arrowamber)"/>
+<path d="M500,158 L540,158" stroke="#A6521C" stroke-width="1.6" fill="none" marker-end="url(#arrowamber)"/>
+<path d="M645,206 L645,240 L145,240 L145,266" stroke="#0D5B87" stroke-width="1.6" fill="none" marker-end="url(#arrowblue)"/>
+<path d="M250,314 L290,314" stroke="#0D5B87" stroke-width="1.6" fill="none" marker-end="url(#arrowblue)"/>
+<path d="M500,314 L540,314" stroke="#0D5B87" stroke-width="1.6" fill="none" marker-end="url(#arrowblue)"/>
+<path d="M750,314 L790,314" stroke="#5A6B78" stroke-width="1.6" fill="none" marker-end="url(#arrow)" stroke-dasharray="4 4"/>
+<path d="M40,398 L40,432" stroke="#C4CFDA" stroke-width="2"/>
+<text x="54" y="410" font-size="12" fill="#0F171E" font-weight="bold" text-anchor="start">Why one shot</text>
+<text x="54" y="428" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">Press-to-talk already gives an explicit end signal, so the model sees full sentence context — more accurate, and no segment stitching.</text>
+<path d="M40,442 L40,476" stroke="#C4CFDA" stroke-width="2"/>
+<text x="54" y="454" font-size="12" fill="#0F171E" font-weight="bold" text-anchor="start">Why the bullets are gone</text>
+<text x="54" y="472" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">The sherpa demo collected one result per VAD segment into a list. Here there is one result and one Text.</text>
+<path d="M40,486 L40,520" stroke="#C4CFDA" stroke-width="2"/>
+<text x="54" y="498" font-size="12" fill="#0F171E" font-weight="bold" text-anchor="start">Why the clipboard waits</text>
+<text x="54" y="516" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">Step 7 is the only code path touching ClipboardManager, and nothing calls it automatically.</text>
+</svg>

@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="700" viewBox="0 0 1000 700" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+<title>Architecture layers</title>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5A6B78"/></marker>
+  <marker id="arrowblue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0D5B87"/></marker>
+  <marker id="arrowamber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#A6521C"/></marker>
+</defs>
+<rect width="1000" height="700" fill="#F3F6F8"/>
+<text x="40" y="44" font-size="22" fill="#0F171E" font-weight="bold" text-anchor="start">Architecture</text>
+<text x="40" y="66" font-size="13" fill="#5A6B78" font-weight="normal" text-anchor="start">One module, five packages. Every arrow points down; nothing points back up.</text>
+<rect x="40" y="92" width="920" height="74" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<text x="56" y="112" font-size="10" fill="#8A98A4" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace" letter-spacing="1.1">UI</text>
+<text x="56.0" y="140" font-size="14" fill="#0F171E" font-weight="bold" text-anchor="start">DictationScreen</text>
+<text x="356.0" y="140" font-size="14" fill="#0F171E" font-weight="bold" text-anchor="start">HistoryScreen</text>
+<text x="656.0" y="140" font-size="14" fill="#0F171E" font-weight="bold" text-anchor="start">SettingsScreen</text>
+<rect x="40" y="186" width="920" height="66" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<text x="56" y="206" font-size="10" fill="#8A98A4" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace" letter-spacing="1.1">UI</text>
+<text x="56" y="226" font-size="14" fill="#0F171E" font-weight="bold" text-anchor="start">DictationViewModel</text>
+<text x="56" y="244" font-size="12" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">phase  ·  result  ·  engineState  ·  scan  ·  history</text>
+<rect x="40" y="272" width="920" height="66" rx="8" fill="#DCE9F2" stroke="#0D5B87" stroke-width="1"/>
+<text x="56" y="292" font-size="10" fill="#8A98A4" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace" letter-spacing="1.1">APP</text>
+<text x="56" y="312" font-size="14" fill="#0F171E" font-weight="bold" text-anchor="start">AppContainer   (hand-wired, not Hilt)</text>
+<text x="56" y="330" font-size="12" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">one AsrEngine  ·  AudioRecorder  ·  SettingsStore  ·  HistoryStore</text>
+<text x="56" y="364" font-size="10" fill="#8A98A4" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace" letter-spacing="1.1">CORE</text>
+<rect x="40.0" y="372" width="219.5" height="104" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<rect x="40.0" y="372" width="219.5" height="3" rx="1.5" fill="#0D5B87"/>
+<text x="54.0" y="400" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">core/asr</text>
+<text x="54.0" y="420" font-size="11.5" fill="#0F171E" font-weight="normal" text-anchor="start">AsrEngine</text>
+<text x="54.0" y="437" font-size="11.5" fill="#0F171E" font-weight="normal" text-anchor="start">ModelRecipe</text>
+<text x="54.0" y="454" font-size="11.5" fill="#0F171E" font-weight="normal" text-anchor="start">ModelScanner</text>
+<text x="54.0" y="471" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">ModelLocator</text>
+<rect x="273.5" y="372" width="219.5" height="104" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<rect x="273.5" y="372" width="219.5" height="3" rx="1.5" fill="#A6521C"/>
+<text x="287.5" y="400" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">core/audio</text>
+<text x="287.5" y="420" font-size="11.5" fill="#0F171E" font-weight="normal" text-anchor="start">AudioRecorder</text>
+<text x="287.5" y="437" font-size="11.5" fill="#0F171E" font-weight="normal" text-anchor="start">CaptureSource</text>
+<text x="287.5" y="454" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">16 kHz mono, fixed</text>
+<rect x="507.0" y="372" width="219.5" height="104" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<rect x="507.0" y="372" width="219.5" height="3" rx="1.5" fill="#1A6A4C"/>
+<text x="521.0" y="400" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">core/data</text>
+<text x="521.0" y="420" font-size="11.5" fill="#0F171E" font-weight="normal" text-anchor="start">SettingsStore</text>
+<text x="521.0" y="437" font-size="11.5" fill="#0F171E" font-weight="normal" text-anchor="start">HistoryStore</text>
+<text x="521.0" y="454" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">ClipboardWriter</text>
+<rect x="740.5" y="372" width="219.5" height="104" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<rect x="740.5" y="372" width="219.5" height="3" rx="1.5" fill="#5A6B78"/>
+<text x="754.5" y="400" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">core/model</text>
+<text x="754.5" y="420" font-size="11.5" fill="#0F171E" font-weight="normal" text-anchor="start">Transcript</text>
+<text x="754.5" y="437" font-size="11.5" fill="#0F171E" font-weight="normal" text-anchor="start">ModelDescriptor</text>
+<text x="754.5" y="454" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">pure Kotlin, no Android</text>
+<rect x="40" y="502" width="920" height="58" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1" stroke-dasharray="5 4"/>
+<text x="56" y="522" font-size="10" fill="#8A98A4" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace" letter-spacing="1.1">VENDORED · SHERPA-ONNX V1.13.8</text>
+<text x="56" y="544" font-size="13" fill="#0F171E" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">com.k2fsa.sherpa.onnx — 7 Kotlin files, unmodified</text>
+<text x="944" y="544" font-size="11.5" fill="#8A98A4" font-weight="normal" text-anchor="end">no Maven artifact upstream</text>
+<rect x="40" y="578" width="920" height="50" rx="8" fill="#E6EDF2" stroke="#C4CFDA" stroke-width="1"/>
+<text x="56" y="609" font-size="13" fill="#0F171E" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">libsherpa-onnx-jni.so   +   libonnxruntime.so</text>
+<text x="944" y="609" font-size="11.5" fill="#8A98A4" font-weight="normal" text-anchor="end">arm64-v8a only</text>
+<rect x="40" y="646" width="920" height="44" rx="8" fill="#F7E2DE" stroke="#B23520" stroke-width="1"/>
+<text x="56" y="674" font-size="13" fill="#B23520" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">/sdcard/Models/&lt;model&gt;/  encoder · decoder · joiner · tokens.txt</text>
+<path d="M500.0,166 L500.0,186" stroke="#5A6B78" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<path d="M500.0,252 L500.0,272" stroke="#5A6B78" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<path d="M500.0,338 L500.0,372" stroke="#5A6B78" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<path d="M500.0,476 L500.0,502" stroke="#5A6B78" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<path d="M500.0,560 L500.0,578" stroke="#5A6B78" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<path d="M500.0,628 L500.0,646" stroke="#5A6B78" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+</svg>

@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="616" viewBox="0 0 1000 616" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+<title>Model resolution</title>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5A6B78"/></marker>
+  <marker id="arrowblue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0D5B87"/></marker>
+  <marker id="arrowamber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#A6521C"/></marker>
+</defs>
+<rect width="1000" height="616" fill="#F3F6F8"/>
+<text x="40" y="44" font-size="22" fill="#0F171E" font-weight="bold" text-anchor="start">How weights become a loaded model</text>
+<text x="40" y="66" font-size="13" fill="#5A6B78" font-weight="normal" text-anchor="start">New weights of a known family cost no code. A new family costs one object.</text>
+<rect x="40" y="104" width="260" height="88" rx="8" fill="#F7E2DE" stroke="#B23520" stroke-width="1"/>
+<text x="56" y="124" font-size="10" fill="#8A98A4" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace" letter-spacing="1.1">SHARED STORAGE</text>
+<text x="56" y="146" font-size="13" fill="#B23520" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">/sdcard/Models/</text>
+<text x="56" y="168" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">one directory per model</text>
+<rect x="40" y="232" width="260" height="100" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<text x="56" y="258" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">ModelLocator</text>
+<text x="56" y="280" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">isExternalStorageManager()</text>
+<text x="56" y="300" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">re-checked on every ON_RESUME —</text>
+<text x="56" y="316" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">there is no permission callback</text>
+<rect x="360" y="104" width="280" height="228" rx="8" fill="#FFFFFF" stroke="#0D5B87" stroke-width="1"/>
+<text x="376" y="126" font-size="10" fill="#8A98A4" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace" letter-spacing="1.1">PER DIRECTORY</text>
+<text x="376" y="150" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">ModelScanner.inspect()</text>
+<text x="376" y="176" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">model.json present?  → recipe by id</text>
+<text x="376" y="196" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">otherwise  → ModelRecipes.detect()</text>
+<text x="376" y="236" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">all required files exist</text>
+<text x="376" y="256" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">encoder &gt; 100 MB  (truncated copy)</text>
+<text x="376" y="276" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">tokens.txt parses</text>
+<path d="M376,296 L620,296" stroke="#C4CFDA" stroke-width="1"/>
+<text x="376" y="318" font-size="11.5" fill="#B23520" font-weight="normal" text-anchor="start">never skipped silently</text>
+<rect x="700" y="104" width="260" height="100" rx="8" fill="#DCEDE5" stroke="#1A6A4C" stroke-width="1"/>
+<text x="716" y="130" font-size="13" fill="#1A6A4C" font-weight="bold" text-anchor="start">Recognised</text>
+<text x="716" y="152" font-size="11.5" fill="#0F171E" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">ModelDescriptor</text>
+<text x="716" y="172" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">id · recipe · size · tuning</text>
+<text x="716" y="192" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">selectable in Settings</text>
+<rect x="700" y="232" width="260" height="100" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<text x="716" y="258" font-size="13" fill="#5A6B78" font-weight="bold" text-anchor="start">Unrecognised</text>
+<text x="716" y="280" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">dirName + the reason</text>
+<text x="716" y="302" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">shown on screen, so a</text>
+<text x="716" y="318" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">missing folder explains itself</text>
+<path d="M300,148 L360,148" stroke="#0D5B87" stroke-width="1.6" fill="none" marker-end="url(#arrowblue)"/>
+<path d="M300,282 L348,282" stroke="#5A6B78" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<path d="M348,282 L348,200 L360,200" stroke="#5A6B78" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<path d="M640,154 L700,154" stroke="#1A6A4C" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<path d="M640,282 L700,282" stroke="#5A6B78" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<rect x="40" y="386" width="920" height="192" rx="8" fill="#FFFFFF" stroke="#C4CFDA" stroke-width="1"/>
+<text x="58" y="410" font-size="10" fill="#8A98A4" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace" letter-spacing="1.1">THE RECIPE LAYER — WHY SWAPPING WEIGHTS IS CHEAP</text>
+<text x="58" y="438" font-size="13" fill="#0D5B87" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">interface ModelRecipe</text>
+<text x="58" y="462" font-size="12" fill="#5A6B78" font-weight="normal" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace">requiredFiles  ·  matches(dir)  ·  buildConfig(dir, tuning)</text>
+<path d="M58,490 L58,542" stroke="#C4CFDA" stroke-width="2"/>
+<text x="72" y="504" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start">Weights</text>
+<text x="72" y="522" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">A directory in storage.</text>
+<text x="72" y="540" font-size="11" fill="#8A98A4" font-weight="normal" text-anchor="start">New export of a family already</text>
+<text x="72" y="555" font-size="11" fill="#8A98A4" font-weight="normal" text-anchor="start">supported → drop it in. Zero code.</text>
+<path d="M378,490 L378,542" stroke="#C4CFDA" stroke-width="2"/>
+<text x="392" y="504" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start">Recipe</text>
+<text x="392" y="522" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">How a family maps to a config.</text>
+<text x="392" y="540" font-size="11" fill="#8A98A4" font-weight="normal" text-anchor="start">New family (whisper, streaming,</text>
+<text x="392" y="555" font-size="11" fill="#8A98A4" font-weight="normal" text-anchor="start">moonshine) → one ~15-line object.</text>
+<path d="M698,490 L698,542" stroke="#C4CFDA" stroke-width="2"/>
+<text x="712" y="504" font-size="13" fill="#0F171E" font-weight="bold" text-anchor="start">model.json</text>
+<text x="712" y="522" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">Optional, in the model dir.</text>
+<text x="712" y="540" font-size="11" fill="#8A98A4" font-weight="normal" text-anchor="start">Overrides detection when an</text>
+<text x="712" y="555" font-size="11" fill="#8A98A4" font-weight="normal" text-anchor="start">export's filenames differ.</text>
+</svg>

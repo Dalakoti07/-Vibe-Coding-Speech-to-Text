@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="500" viewBox="0 0 1000 500" font-family="Helvetica Neue, Helvetica, Arial, sans-serif">
+<title>State machine</title>
+<defs>
+  <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5A6B78"/></marker>
+  <marker id="arrowblue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#0D5B87"/></marker>
+  <marker id="arrowamber" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#A6521C"/></marker>
+</defs>
+<rect width="1000" height="500" fill="#F3F6F8"/>
+<text x="40" y="44" font-size="22" fill="#0F171E" font-weight="bold" text-anchor="start">Engine and dictation states</text>
+<text x="40" y="66" font-size="13" fill="#5A6B78" font-weight="normal" text-anchor="start">Every failure the app can reach is a state with a screen, not a toast.</text>
+<text x="56" y="104" font-size="10" fill="#8A98A4" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace" letter-spacing="1.1">ENGINE  ·  WARMED AT LAUNCH, NEVER ON THE KEY PRESS</text>
+<rect x="40" y="140" width="170" height="52" rx="26" fill="#FFFFFF" stroke="#5A6B78" stroke-width="1"/>
+<text x="125" y="172" font-size="14" fill="#5A6B78" font-weight="bold" text-anchor="middle">Unloaded</text>
+<rect x="250" y="140" width="170" height="52" rx="26" fill="#FFFFFF" stroke="#0D5B87" stroke-width="1"/>
+<text x="335" y="172" font-size="14" fill="#0D5B87" font-weight="bold" text-anchor="middle">Loading</text>
+<rect x="460" y="140" width="170" height="52" rx="26" fill="#FFFFFF" stroke="#1A6A4C" stroke-width="1"/>
+<text x="545" y="172" font-size="14" fill="#1A6A4C" font-weight="bold" text-anchor="middle">Ready</text>
+<rect x="700" y="140" width="170" height="52" rx="26" fill="#FFFFFF" stroke="#B23520" stroke-width="1"/>
+<text x="785" y="172" font-size="14" fill="#B23520" font-weight="bold" text-anchor="middle">Failed</text>
+<path d="M210,166 L250,166" stroke="#0D5B87" stroke-width="1.6" fill="none" marker-end="url(#arrowblue)"/>
+<path d="M420,166 L460,166" stroke="#1A6A4C" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<text x="230" y="130" font-size="10.5" fill="#8A98A4" font-weight="normal" text-anchor="middle">model selected</text>
+<path d="M420,180 L440,212 L785,212 L785,192" stroke="#B23520" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<text x="612" y="232" font-size="10.5" fill="#B23520" font-weight="normal" text-anchor="middle">invalid directory  ·  missing grant</text>
+<text x="56" y="298" font-size="10" fill="#8A98A4" font-weight="bold" text-anchor="start" font-family="Menlo, DejaVu Sans Mono, monospace" letter-spacing="1.1">DICTATION PHASE</text>
+<rect x="40" y="334" width="170" height="52" rx="26" fill="#FFFFFF" stroke="#5A6B78" stroke-width="1"/>
+<text x="125" y="366" font-size="14" fill="#5A6B78" font-weight="bold" text-anchor="middle">Idle</text>
+<rect x="250" y="334" width="170" height="52" rx="26" fill="#FFFFFF" stroke="#A6521C" stroke-width="1"/>
+<text x="335" y="366" font-size="14" fill="#A6521C" font-weight="bold" text-anchor="middle">Recording</text>
+<rect x="460" y="334" width="170" height="52" rx="26" fill="#FFFFFF" stroke="#0D5B87" stroke-width="1"/>
+<text x="545" y="366" font-size="14" fill="#0D5B87" font-weight="bold" text-anchor="middle">Transcribing</text>
+<rect x="700" y="334" width="170" height="52" rx="26" fill="#FFFFFF" stroke="#B23520" stroke-width="1"/>
+<text x="785" y="366" font-size="14" fill="#B23520" font-weight="bold" text-anchor="middle">Error</text>
+<path d="M210,360 L250,360" stroke="#A6521C" stroke-width="1.6" fill="none" marker-end="url(#arrowamber)"/>
+<path d="M420,360 L460,360" stroke="#0D5B87" stroke-width="1.6" fill="none" marker-end="url(#arrowblue)"/>
+<path d="M630,360 L700,360" stroke="#B23520" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<text x="230" y="324" font-size="10.5" fill="#8A98A4" font-weight="normal" text-anchor="middle">press / tap</text>
+<text x="440" y="324" font-size="10.5" fill="#8A98A4" font-weight="normal" text-anchor="middle">release / tap again</text>
+<text x="665" y="324" font-size="10.5" fill="#B23520" font-weight="normal" text-anchor="middle">too short</text>
+<path d="M545,386 L545,414 L125,414 L125,386" stroke="#1A6A4C" stroke-width="1.6" fill="none" marker-end="url(#arrow)"/>
+<text x="335" y="434" font-size="10.5" fill="#1A6A4C" font-weight="normal" text-anchor="middle">text emitted, persisted, rendered</text>
+<path d="M40,462 L960,462" stroke="#C4CFDA" stroke-width="1"/>
+<text x="40" y="486" font-size="11.5" fill="#5A6B78" font-weight="normal" text-anchor="start">Recording ends with a stop flag, never coroutine cancellation — cancelling throws away the audio the user just spoke.</text>
+</svg>
