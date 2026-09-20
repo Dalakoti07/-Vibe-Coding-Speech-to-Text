@@ -5,6 +5,20 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
 }
 
+// Version comes from the git tag in CI (-PversionName=1.2.3); this is the local fallback.
+val appVersionName: String = (project.findProperty("versionName") as String?) ?: "1.0.0"
+
+// 1.2.3 -> 10203, so a newer tag always sorts above an older install.
+val appVersionCode: Int = (project.findProperty("versionCode") as String?)?.toInt()
+    ?: appVersionName.substringBefore('-').split(".").let { parts ->
+        (parts.getOrNull(0)?.toIntOrNull() ?: 1) * 10000 +
+            (parts.getOrNull(1)?.toIntOrNull() ?: 0) * 100 +
+            (parts.getOrNull(2)?.toIntOrNull() ?: 0)
+    }
+
+// Set by CI when the signing secrets exist. Absent locally, and that is fine.
+val releaseKeystore: String? = System.getenv("KEYSTORE_FILE")
+
 android {
     namespace = "com.dalakoti.apps.speechtotext"
     compileSdk = 36
@@ -13,8 +27,8 @@ android {
         applicationId = "com.dalakoti.apps.speechtotext"
         minSdk = 33
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -22,8 +36,27 @@ android {
         ndk { abiFilters += "arm64-v8a" }
     }
 
+    signingConfigs {
+        create("release") {
+            if (releaseKeystore != null) {
+                storeFile = file(releaseKeystore)
+                storePassword = System.getenv("KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            // With the CI secrets present this is a real release key. Without them it
+            // falls back to the debug key, so `assembleRelease` still produces an APK
+            // you can install — it just cannot update a differently-signed install.
+            signingConfig = if (releaseKeystore != null) {
+                signingConfigs.getByName("release")
+            } else {
+                signingConfigs.getByName("debug")
+            }
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),

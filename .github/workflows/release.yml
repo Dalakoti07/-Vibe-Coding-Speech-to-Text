@@ -1,0 +1,171 @@
+name: Release APK
+
+# Only on a tag. Ordinary pushes build nothing — this is a release pipeline,
+# not CI. Tag with scripts/release.sh, or by hand:
+#     git tag -a v1.0.0 -m "…" && git push origin v1.0.0
+on:
+  push:
+    tags:
+      - 'v*'
+  # Build an APK without cutting a release — useful for checking the pipeline.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to build, no leading v (e.g. 1.0.0)'
+        required: true
+        default: '0.0.0'
+
+permissions:
+  contents: write        # required to create the GitHub Release
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      # Lifted to job level so `if: env.… != ''` can see it. Signing is optional:
+      # without these secrets the APK is debug-signed but still installable.
+      KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # full history, so the changelog can diff tags
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'      # AGP 8.13 needs 17+, whatever the source level is
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Resolve version
+        id: v
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            NAME="${{ inputs.version }}"
+          else
+            NAME="${GITHUB_REF_NAME#v}"
+          fi
+
+          # 1.2.3 -> 10203, so a newer tag always outranks an older install.
+          CORE="${NAME%%-*}"
+          IFS=. read -r MAJ MIN PAT <<< "$CORE"
+          CODE=$(( ${MAJ:-0} * 10000 + ${MIN:-0} * 100 + ${PAT:-0} ))
+
+          echo "name=$NAME"  >> "$GITHUB_OUTPUT"
+          echo "code=$CODE"  >> "$GITHUB_OUTPUT"
+          # A hyphen means a pre-release: v2.0.0-beta1
+          if [[ "$NAME" == *-* ]]; then
+            echo "prerelease=true"  >> "$GITHUB_OUTPUT"
+          else
+            echo "prerelease=false" >> "$GITHUB_OUTPUT"
+          fi
+          echo "Building $NAME (versionCode $CODE)"
+
+      - name: Decode signing keystore
+        if: env.KEYSTORE_BASE64 != ''
+        run: |
+          set -euo pipefail
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/release.jks"
+          echo "KEYSTORE_FILE=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
+          echo "Signing with the release key."
+
+      - name: Warn when unsigned
+        if: env.KEYSTORE_BASE64 == ''
+        run: |
+          echo "::warning::No KEYSTORE_BASE64 secret — the APK will be debug-signed. \
+          Installable, but it cannot update an install made with a different key."
+
+      - name: Build release APK
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew :app:assembleRelease --no-daemon \
+            -PversionName=${{ steps.v.outputs.name }} \
+            -PversionCode=${{ steps.v.outputs.code }}
+
+      - name: Name the artefact
+        id: apk
+        run: |
+          set -euo pipefail
+          SRC=app/build/outputs/apk/release/app-release.apk
+          OUT="parakeet-${{ steps.v.outputs.name }}.apk"
+          mv "$SRC" "$OUT"
+          echo "path=$OUT" >> "$GITHUB_OUTPUT"
+          echo "size=$(du -h "$OUT" | cut -f1)" >> "$GITHUB_OUTPUT"
+          echo "sha=$(sha256sum "$OUT" | cut -d' ' -f1)" >> "$GITHUB_OUTPUT"
+
+      - name: Upload build artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: parakeet-${{ steps.v.outputs.name }}
+          path: ${{ steps.apk.outputs.path }}
+          retention-days: 30
+
+      # Everything below is tag-only. A workflow_dispatch run stops here with an
+      # artefact and no release, which is the point of having it.
+      - name: Write release notes
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF_NAME}"
+          PREV=$(git describe --tags --abbrev=0 "${TAG}^" 2>/dev/null || true)
+
+          {
+            echo "On-device speech-to-text. The model is **not** bundled — see below."
+            echo
+            echo "| | |"
+            echo "|---|---|"
+            echo "| APK | \`${{ steps.apk.outputs.path }}\` · ${{ steps.apk.outputs.size }} |"
+            echo "| SHA-256 | \`${{ steps.apk.outputs.sha }}\` |"
+            echo "| versionCode | ${{ steps.v.outputs.code }} |"
+            echo "| Commit | ${GITHUB_SHA:0:8} |"
+            if [ -n "${KEYSTORE_BASE64}" ]; then
+              echo "| Signing | release key |"
+            else
+              echo "| Signing | **debug key** — installable, but cannot update a differently-signed install |"
+            fi
+            echo "| ABI | arm64-v8a only |"
+            echo
+            echo "### Before it will do anything"
+            echo
+            echo "The APK carries no weights. Put a model on the device and grant two permissions:"
+            echo
+            echo '```bash'
+            echo 'adb shell mkdir -p /sdcard/Models'
+            echo 'adb push sherpa-onnx-nemo-parakeet-unified-en-0.6b-int8-non-streaming /sdcard/Models/'
+            echo '```'
+            echo
+            echo "Then **All files access** (Settings → Apps → Parakeet → Permissions → Files and media)"
+            echo "and the microphone prompt on first use. On ColorOS neither can be granted over adb."
+            echo
+            echo "### Changes"
+            echo
+            if [ -n "$PREV" ]; then
+              git log --no-merges --pretty='- %s (%h)' "${PREV}..${TAG}"
+              echo
+              echo "[Full diff](${{ github.server_url }}/${{ github.repository }}/compare/${PREV}...${TAG})"
+            else
+              echo "First release."
+            fi
+          } > RELEASE_NOTES.md
+
+          cat RELEASE_NOTES.md
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            "${{ steps.apk.outputs.path }}" \
+            --title "${GITHUB_REF_NAME}" \
+            --notes-file RELEASE_NOTES.md \
+            --prerelease=${{ steps.v.outputs.prerelease }}

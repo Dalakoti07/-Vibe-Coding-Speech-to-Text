@@ -13,16 +13,16 @@ Built against [sherpa-onnx](https://github.com/k2-fsa/sherpa-onnx) with NVIDIA's
 | **Runtime** | sherpa-onnx v1.13.8 + ONNX Runtime, `arm64-v8a` |
 | **Weights** | `/sdcard/Models/` — never downloaded, never bundled |
 | **Language** | English |
-| **Verified on** | OnePlus 9R (LE2101, SD870, Android 14 / ColorOS) |
+| **Verified on** | OnePlus 9R (LE2101, Android 14 / ColorOS) · Galaxy S24 Ultra (SM-S928B, Android 16) |
 
 ### Measured, not estimated
 
 | | |
 |---|---|
-| Cold model load | **2,598 – 3,028 ms** |
-| Peak memory (total PSS) | **830 – 838 MB** |
+| Cold model load | **2,598 – 3,028 ms** (9R) · **2,874 ms** (S24 Ultra) |
+| Peak memory (total PSS) | **830 – 838 MB** (9R) · **1,173 MB** (S24 Ultra) |
 | Encoder on disk | 624 MB |
-| Release APK | ~20 MB |
+| Release APK | 28 MB — `libonnxruntime.so` is 22 MB of it |
 
 The build plan budgeted for 1.2–1.6 GB and set a 1.8 GB abort threshold. The real
 figure is roughly half that, so none of the planned OOM mitigations were needed.
@@ -57,7 +57,7 @@ the app's, and it survives uninstalls.
 - **All files access** — Settings → Apps → Parakeet → Permissions → Files and media
 - **Microphone** — the app asks the first time you hold the button
 
-> **ColorOS will not let `adb` do this for you.** On OnePlus builds both
+> **ColorOS will not let `adb` do this for you** — Samsung will. On OnePlus builds both
 > `pm grant … RECORD_AUDIO` and `appops set … MANAGE_EXTERNAL_STORAGE allow` fail with
 > a `SecurityException` — the shell user lacks `GRANT_RUNTIME_PERMISSIONS` and
 > `MANAGE_APP_OPS_MODES`. Stock Android allows both. Any automated first-run test has
@@ -261,13 +261,32 @@ app/src/main/
 
 docs/
 ├── IMPLEMENTATION_PLAN.md        plan of record, deviations, measurements
+├── RELEASING.md                  tag -> APK -> GitHub Release
 ├── README.md                     documentation index
 └── images/                       architecture diagrams (PNG)
+
+.github/workflows/release.yml     builds and publishes on a v* tag
+scripts/release.sh                tags and pushes, with the checks you want
 ```
+
+## Releasing
+
+Push a tag; GitHub Actions builds the APK and publishes it to
+[Releases](https://github.com/Dalakoti07/-Vibe-Coding-Speech-to-Text/releases). Nothing
+else triggers a build.
+
+```bash
+./scripts/release.sh 1.0.0
+```
+
+Signing is optional — without secrets the APK is debug-signed but still installable. Full
+detail, including keystore setup, in [`docs/RELEASING.md`](docs/RELEASING.md).
 
 ## Further reading
 
 - [`docs/IMPLEMENTATION_PLAN.md`](docs/IMPLEMENTATION_PLAN.md) — the plan this was built
   from, including what was verified against sherpa-onnx source and where the build
   deviates from it
+- [`docs/RELEASING.md`](docs/RELEASING.md) — how a tag becomes a GitHub Release, and how
+  to add signing
 - [`docs/README.md`](docs/README.md) — diagram index
