@@ -213,12 +213,12 @@ every clean install begins in.
 
 | Decision | Why |
 |---|---|
-| **DataStore, not Room** | Five bounded transcripts and three settings. No queries, no joins, no migrations — nothing Room earns its keep on |
+| **DataStore, not Room** | A hundred bounded transcripts and three settings. No queries, no joins, no migrations — nothing Room earns its keep on |
 | **Persist before rendering** | A transcript that flashes up and dies with the process is worse than one that takes 20 ms longer to appear |
 | **Clipboard only on an explicit press** | `ClipboardWriter` is the single code path touching `ClipboardManager`, and nothing calls it automatically. Silently owning the user's clipboard is a misfeature |
 | **`EXTRA_IS_SENSITIVE` on copy** | Dictated text can contain anything; this suppresses the system clipboard preview |
 | **No "Copied!" toast** | Android 13+ shows its own. Yours makes two |
-| **History excluded from Auto Backup** | Otherwise your last five transcripts sync to Google Drive |
+| **History excluded from Auto Backup** | Otherwise your last hundred transcripts sync to Google Drive |
 
 ### Build and dependencies
 
