@@ -77,7 +77,7 @@ would use, so extracting real modules is a move-files job rather than a redesign
 | `ui` | Compose screens, `DictationViewModel` | everything below |
 | `core/asr` | `AsrEngine`, `ModelRecipe`, `ModelScanner`, `ModelLocator` | `core/model`, vendored sherpa |
 | `core/audio` | `AudioRecorder`, `CaptureSource` | — |
-| `core/data` | `SettingsStore`, `HistoryStore`, `ClipboardWriter` | `core/model` |
+| `core/data` | `SettingsStore`, `HistoryStore`, `ClipboardWriter`, `TextSharer` | `core/model` |
 | `core/model` | `Transcript`, `ModelDescriptor`, state types | **nothing** — pure Kotlin |
 | `com.k2fsa.sherpa.onnx` | 7 vendored files, unmodified | JNI |
 
@@ -253,7 +253,7 @@ app/src/main/
 │   ├── MainActivity.kt
 │   ├── core/asr/                 engine, recipes, scanner, locator
 │   ├── core/audio/               AudioRecorder, CaptureSource
-│   ├── core/data/                stores, ClipboardWriter
+│   ├── core/data/                stores, ClipboardWriter, TextSharer
 │   ├── core/model/               pure Kotlin types
 │   └── ui/                       Compose screens, ViewModel, theme
 ├── java/com/k2fsa/sherpa/onnx/   vendored, unmodified — see VENDORED.md
