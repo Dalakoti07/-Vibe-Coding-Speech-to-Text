@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,6 +18,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.dalakoti.apps.speechtotext.core.data.ClipboardWriter
 import com.dalakoti.apps.speechtotext.core.data.HistoryStore
+import com.dalakoti.apps.speechtotext.core.data.TextSharer
 import com.dalakoti.apps.speechtotext.core.model.Transcript
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -61,13 +63,18 @@ fun HistoryScreen(vm: DictationViewModel, modifier: Modifier = Modifier) {
             HistoryRow(
                 transcript = transcript,
                 onCopy = { ClipboardWriter.copy(context, transcript.text) },
+                onShare = { TextSharer.share(context, transcript.text) },
             )
         }
     }
 }
 
 @Composable
-private fun HistoryRow(transcript: Transcript, onCopy: () -> Unit) {
+private fun HistoryRow(
+    transcript: Transcript,
+    onCopy: () -> Unit,
+    onShare: () -> Unit,
+) {
     Surface(
         shape = RoundedCornerShape(16.dp),
         color = MaterialTheme.colorScheme.surface,
@@ -94,10 +101,21 @@ private fun HistoryRow(transcript: Transcript, onCopy: () -> Unit) {
                 )
             }
             Text(transcript.text, style = MaterialTheme.typography.bodyLarge)
-            TextButton(onClick = onCopy, modifier = Modifier.align(Alignment.End)) {
-                Icon(Icons.Default.ContentCopy, null, Modifier.size(16.dp))
-                Spacer(Modifier.width(6.dp))
-                Text("Copy to clipboard")
+            Row(
+                Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(onClick = onShare) {
+                    Icon(Icons.Default.Share, null, Modifier.size(16.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Share")
+                }
+                TextButton(onClick = onCopy) {
+                    Icon(Icons.Default.ContentCopy, null, Modifier.size(16.dp))
+                    Spacer(Modifier.width(6.dp))
+                    Text("Copy to clipboard")
+                }
             }
         }
     }
