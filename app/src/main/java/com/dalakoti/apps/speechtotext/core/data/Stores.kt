@@ -18,7 +18,7 @@ import kotlinx.serialization.json.Json
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore("speechtotext")
 
 /**
- * DataStore, not Room. Five bounded transcripts and three settings: no queries, no joins,
+ * DataStore, not Room. A hundred bounded transcripts and three settings: no queries, no joins,
  * no migrations, nothing Room would earn its keep on.
  */
 class SettingsStore(private val context: Context) {
@@ -58,7 +58,7 @@ class HistoryStore(private val context: Context) {
     private val json = Json { ignoreUnknownKeys = true }
 
     companion object {
-        const val MAX_ITEMS = 5
+        const val MAX_ITEMS = 100
     }
 
     private val listSerializer = ListSerializer(Transcript.serializer())
